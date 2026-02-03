@@ -21,13 +21,6 @@
       "hours": 3,
       "clientId": "ve1e5b7j",
       "notes": ""
-    },
-    {
-      "id": "xtwun4q8",
-      "date": "2026-02-03",
-      "hours": 2,
-      "clientId": "ve1e5b7j",
-      "notes": ""
     }
   ],
   "invoices": [
@@ -43,6 +36,6 @@
   ],
   "payments": [],
   "meta": {
-    "updatedAt": "2026-02-03T23:42:07.822Z"
+    "updatedAt": "2026-02-03T23:51:05.207Z"
   }
 }
