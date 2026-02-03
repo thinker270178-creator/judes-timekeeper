@@ -34,6 +34,7 @@ const githubConfig = {
   branch: 'main',
   path: 'judes-timekeeper-data.json'
 };
+const githubSyncIntervalMs = 30 * 1000;
 const autoBackupDelayMs = 800;
 let backupPending = false;
 
@@ -76,6 +77,7 @@ renderAll();
 restoreStamps();
 restoreGitHubStamp();
 autoLoadFromGitHub();
+startGitHubAutoSync();
 
 // Forms
 
@@ -799,6 +801,61 @@ function toBase64(str) {
   return btoa(unescape(encodeURIComponent(str)));
 }
 
+
+
+function startGitHubAutoSync() {
+  setInterval(async () => {
+    await autoLoadFromGitHub();
+    if (backupPending && hasGitHubToken()) {
+      await saveToGitHubSilent();
+    }
+  }, githubSyncIntervalMs);
+}
+
+function hasGitHubToken() {
+  return !!localStorage.getItem(githubTokenKey);
+}
+
+async function saveToGitHubSilent() {
+  const token = localStorage.getItem(githubTokenKey);
+  if (!token) return;
+  try {
+    const content = JSON.stringify(state, null, 2);
+    const base64 = toBase64(content);
+    const apiBase = `https://api.github.com/repos/${githubConfig.owner}/${githubConfig.repo}/contents/${githubConfig.path}`;
+
+    let sha = null;
+    const getResp = await fetch(`${apiBase}?ref=${githubConfig.branch}`, {
+      headers: { Authorization: `token ${token}` }
+    });
+    if (getResp.ok) {
+      const data = await getResp.json();
+      sha = data.sha;
+    }
+
+    const putResp = await fetch(apiBase, {
+      method: 'PUT',
+      headers: {
+        Authorization: `token ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        message: "Auto backup from Jude's Timekeeper",
+        content: base64,
+        branch: githubConfig.branch,
+        sha: sha || undefined
+      })
+    });
+
+    if (putResp.ok) {
+      setStamp('github', new Date());
+      backupPending = false;
+      updateBackupIndicator();
+    }
+  } catch {
+    // ignore autosync errors
+  }
+}
 
 async function autoLoadFromGitHub() {
   try {
