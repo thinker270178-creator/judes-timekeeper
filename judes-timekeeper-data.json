@@ -23,9 +23,19 @@
       "notes": ""
     }
   ],
-  "invoices": [],
+  "invoices": [
+    {
+      "id": "8p4elxd7",
+      "number": "20260203-2345",
+      "clientId": "ve1e5b7j",
+      "startDate": "2026-01-01",
+      "endDate": "2026-02-03",
+      "notes": "",
+      "total": 75
+    }
+  ],
   "payments": [],
   "meta": {
-    "updatedAt": "2026-02-03T22:36:20.464Z"
+    "updatedAt": "2026-02-03T22:45:25.712Z"
   }
 }
