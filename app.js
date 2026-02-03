@@ -859,7 +859,7 @@ async function saveToGitHubSilent() {
 
 async function autoLoadFromGitHub() {
   try {
-    const rawUrl = `https://raw.githubusercontent.com/${githubConfig.owner}/${githubConfig.repo}/${githubConfig.branch}/${githubConfig.path}`;
+    const rawUrl = `https://raw.githubusercontent.com/${githubConfig.owner}/${githubConfig.repo}/${githubConfig.branch}/${githubConfig.path}?t=${Date.now()}`;
     const resp = await fetch(rawUrl, { cache: 'no-store' });
     if (!resp.ok) return;
     const remote = await resp.json();
