@@ -24,6 +24,15 @@ let lastInvoiceHTML = '';
 const saveStamp = document.querySelector('#save-stamp');
 const loadStamp = document.querySelector('#load-stamp');
 const stampKey = 'judes-timekeeper-stamps';
+
+const githubStamp = document.querySelector('#github-stamp');
+const githubTokenKey = 'judes-timekeeper-github-token';
+const githubConfig = {
+  owner: 'thinker270178-creator',
+  repo: 'judes-timekeeper',
+  branch: 'main',
+  path: 'judes-timekeeper-data.json'
+};
 const autoBackupDelayMs = 800;
 let backupPending = false;
 
@@ -64,6 +73,7 @@ document.querySelector('#search-payments').addEventListener('input', () => rende
 setupTabs();
 renderAll();
 restoreStamps();
+restoreGitHubStamp();
 
 // Forms
 
@@ -146,6 +156,10 @@ document.querySelector('#payment-form').addEventListener('submit', (event) => {
 
 document.querySelector('#export-data').addEventListener('click', () => {
   downloadBackup();
+});
+
+document.querySelector('#export-github').addEventListener('click', () => {
+  saveToGitHub();
 });
 
 document.querySelector('#import-data').addEventListener('change', (event) => {
@@ -691,6 +705,7 @@ function setStamp(type, date) {
   const formatted = new Date(date).toLocaleString();
   if (type === 'save' && saveStamp) saveStamp.textContent = formatted;
   if (type === 'load' && loadStamp) loadStamp.textContent = formatted;
+  if (type === 'github' && githubStamp) githubStamp.textContent = formatted;
   const existing = JSON.parse(localStorage.getItem(stampKey) || '{}');
   existing[type] = formatted;
   localStorage.setItem(stampKey, JSON.stringify(existing));
@@ -703,6 +718,11 @@ function restoreStamps() {
   updateBackupIndicator();
 }
 
+function restoreGitHubStamp() {
+  const existing = JSON.parse(localStorage.getItem(stampKey) || '{}');
+  if (githubStamp && existing.github) githubStamp.textContent = existing.github;
+}
+
 function getSearchValue(id) {
   const el = document.querySelector(`#${id}`);
   return el ? el.value.trim().toLowerCase() : '';
@@ -711,6 +731,66 @@ function getSearchValue(id) {
 function matchesQuery(fields, query) {
   if (!query) return true;
   return fields.some(field => String(field ?? '').toLowerCase().includes(query));
+}
+
+
+async function saveToGitHub() {
+  const token = getGitHubToken();
+  if (!token) return;
+
+  const content = JSON.stringify(state, null, 2);
+  const base64 = toBase64(content);
+  const apiBase = `https://api.github.com/repos/${githubConfig.owner}/${githubConfig.repo}/contents/${githubConfig.path}`;
+
+  let sha = null;
+  try {
+    const getResp = await fetch(`${apiBase}?ref=${githubConfig.branch}`, {
+      headers: { Authorization: `token ${token}` }
+    });
+    if (getResp.ok) {
+      const data = await getResp.json();
+      sha = data.sha;
+    }
+  } catch {}
+
+  const putResp = await fetch(apiBase, {
+    method: 'PUT',
+    headers: {
+      Authorization: `token ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      message: 'Backup from Jude's Timekeeper',
+      content: base64,
+      branch: githubConfig.branch,
+      sha: sha || undefined
+    })
+  });
+
+  if (!putResp.ok) {
+    const text = await putResp.text();
+    alert('GitHub save failed. Check token permissions.
+' + text);
+    return;
+  }
+
+  setStamp('github', new Date());
+  if (githubStamp) githubStamp.textContent = new Date().toLocaleString();
+  alert('Saved to GitHub successfully.');
+}
+
+function getGitHubToken() {
+  let token = localStorage.getItem(githubTokenKey);
+  if (!token) {
+    token = prompt('Enter your GitHub token (stored locally in this browser):');
+    if (!token) return null;
+    localStorage.setItem(githubTokenKey, token);
+  }
+  return token;
+}
+
+function toBase64(str) {
+  return btoa(unescape(encodeURIComponent(str)));
 }
 
 function formatCurrency(value) {
