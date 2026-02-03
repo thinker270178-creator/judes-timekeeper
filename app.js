@@ -26,6 +26,7 @@ const loadStamp = document.querySelector('#load-stamp');
 const stampKey = 'judes-timekeeper-stamps';
 
 const githubStamp = document.querySelector('#github-stamp');
+const githubSync = document.querySelector('#github-sync');
 const githubTokenKey = 'judes-timekeeper-github-token';
 const githubConfig = {
   owner: 'thinker270178-creator',
@@ -709,6 +710,7 @@ function setStamp(type, date) {
   if (type === 'save' && saveStamp) saveStamp.textContent = formatted;
   if (type === 'load' && loadStamp) loadStamp.textContent = formatted;
   if (type === 'github' && githubStamp) githubStamp.textContent = formatted;
+  if (type === 'github' && githubSync) githubSync.textContent = formatted;
   const existing = JSON.parse(localStorage.getItem(stampKey) || '{}');
   existing[type] = formatted;
   localStorage.setItem(stampKey, JSON.stringify(existing));
@@ -724,6 +726,7 @@ function restoreStamps() {
 function restoreGitHubStamp() {
   const existing = JSON.parse(localStorage.getItem(stampKey) || '{}');
   if (githubStamp && existing.github) githubStamp.textContent = existing.github;
+  if (githubSync && existing.github) githubSync.textContent = existing.github;
 }
 
 function getSearchValue(id) {
@@ -778,6 +781,7 @@ async function saveToGitHub() {
 
   setStamp('github', new Date());
   if (githubStamp) githubStamp.textContent = new Date().toLocaleString();
+      if (githubSync) githubSync.textContent = new Date().toLocaleString();
   alert('Saved to GitHub successfully.');
 }
 
@@ -813,6 +817,7 @@ async function autoLoadFromGitHub() {
       localStorage.setItem(stateKey, JSON.stringify(state));
       renderAll();
       if (githubStamp) githubStamp.textContent = new Date().toLocaleString();
+      if (githubSync) githubSync.textContent = new Date().toLocaleString();
     }
   } catch {
     // ignore auto-load errors
