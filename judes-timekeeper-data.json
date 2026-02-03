@@ -9,13 +9,41 @@
   ],
   "entries": [
     {
-      "id": "v0uze0qr",
+      "id": "g9qg5nud",
       "date": "2026-02-03",
-      "hours": 5,
+      "hours": 1,
       "clientId": "ve1e5b7j",
       "notes": ""
     }
   ],
-  "invoices": [],
-  "payments": []
+  "invoices": [
+    {
+      "id": "sy6psm8h",
+      "number": "20260203-1211",
+      "clientId": "ve1e5b7j",
+      "startDate": "2026-01-01",
+      "endDate": "2026-02-03",
+      "notes": "",
+      "total": 15
+    },
+    {
+      "id": "sxalm6zo",
+      "number": "20260203-1215",
+      "clientId": "ve1e5b7j",
+      "startDate": "2026-01-01",
+      "endDate": "2026-02-03",
+      "notes": "",
+      "total": 15
+    }
+  ],
+  "payments": [
+    {
+      "id": "m7nyuefm",
+      "date": "2026-02-03",
+      "clientId": "ve1e5b7j",
+      "method": "Cash",
+      "amount": 15,
+      "notes": ""
+    }
+  ]
 }
