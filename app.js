@@ -760,7 +760,7 @@ async function saveToGitHub() {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      message: 'Backup from Jude's Timekeeper',
+      message: "Backup from Jude's Timekeeper", 
       content: base64,
       branch: githubConfig.branch,
       sha: sha || undefined
@@ -769,8 +769,7 @@ async function saveToGitHub() {
 
   if (!putResp.ok) {
     const text = await putResp.text();
-    alert('GitHub save failed. Check token permissions.
-' + text);
+    alert(`GitHub save failed. Check token permissions.\n${text}`);
     return;
   }
 
