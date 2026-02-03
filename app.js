@@ -74,6 +74,7 @@ setupTabs();
 renderAll();
 restoreStamps();
 restoreGitHubStamp();
+autoLoadFromGitHub();
 
 // Forms
 
@@ -196,6 +197,8 @@ function loadState() {
 }
 
 function saveState() {
+  if (!state.meta) state.meta = {};
+  state.meta.updatedAt = new Date().toISOString();
   localStorage.setItem(stateKey, JSON.stringify(state));
   scheduleAutoBackup();
 }
@@ -790,6 +793,30 @@ function getGitHubToken() {
 
 function toBase64(str) {
   return btoa(unescape(encodeURIComponent(str)));
+}
+
+
+async function autoLoadFromGitHub() {
+  try {
+    const rawUrl = `https://raw.githubusercontent.com/${githubConfig.owner}/${githubConfig.repo}/${githubConfig.branch}/${githubConfig.path}`;
+    const resp = await fetch(rawUrl, { cache: 'no-store' });
+    if (!resp.ok) return;
+    const remote = await resp.json();
+    const remoteUpdated = remote?.meta?.updatedAt ? Date.parse(remote.meta.updatedAt) : 0;
+    const localUpdated = state?.meta?.updatedAt ? Date.parse(state.meta.updatedAt) : 0;
+    if (remoteUpdated > localUpdated) {
+      state.clients = remote.clients || [];
+      state.entries = remote.entries || [];
+      state.invoices = remote.invoices || [];
+      state.payments = remote.payments || [];
+      state.meta = remote.meta || { updatedAt: new Date().toISOString() };
+      localStorage.setItem(stateKey, JSON.stringify(state));
+      renderAll();
+      if (githubStamp) githubStamp.textContent = new Date().toLocaleString();
+    }
+  } catch {
+    // ignore auto-load errors
+  }
 }
 
 function formatCurrency(value) {
